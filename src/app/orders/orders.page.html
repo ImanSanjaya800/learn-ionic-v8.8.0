@@ -1,0 +1,76 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>CRUD Pesanan</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">CRUD Pesanan</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <main class="crud-layout">
+    <section class="form-section">
+      <h2>{{ editingId ? 'Edit Pesanan' : 'Tambah Pesanan' }}</h2>
+
+      <ion-list lines="full">
+        <ion-item>
+          <ion-input label="Nama Customer" labelPlacement="stacked" placeholder="Contoh: Sinta" [(ngModel)]="form.customer"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input label="Menu" labelPlacement="stacked" placeholder="Contoh: Kopi Susu" [(ngModel)]="form.menu"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-select label="Status" labelPlacement="stacked" [(ngModel)]="form.status">
+            <ion-select-option value="Menunggu">Menunggu</ion-select-option>
+            <ion-select-option value="Diproses">Diproses</ion-select-option>
+            <ion-select-option value="Selesai">Selesai</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item>
+          <ion-input label="Total" labelPlacement="stacked" type="number" [(ngModel)]="form.total"></ion-input>
+        </ion-item>
+      </ion-list>
+
+      <div class="form-actions">
+        <ion-button expand="block" color="warning" (click)="saveOrder()">
+          <ion-icon name="save-outline" slot="start"></ion-icon>
+          {{ editingId ? 'Simpan Perubahan' : 'Tambah Pesanan' }}
+        </ion-button>
+        <ion-button *ngIf="editingId" expand="block" fill="outline" color="medium" (click)="resetForm()">
+          <ion-icon name="close-outline" slot="start"></ion-icon>
+          Batal
+        </ion-button>
+      </div>
+    </section>
+
+    <section class="list-section">
+      <div class="section-heading">
+        <h2>Daftar Pesanan</h2>
+        <ion-badge color="warning">{{ orders.length }} order</ion-badge>
+      </div>
+
+      <ion-list>
+        <ion-item *ngFor="let order of orders">
+          <ion-label>
+            <h3>{{ order.customer }}</h3>
+            <p>{{ order.menu }} · {{ order.status }} · Rp {{ order.total | number }}</p>
+          </ion-label>
+          <ion-buttons slot="end">
+            <ion-button fill="clear" color="primary" (click)="editOrder(order)" aria-label="Edit pesanan">
+              <ion-icon name="create-outline"></ion-icon>
+            </ion-button>
+            <ion-button fill="clear" color="danger" (click)="deleteOrder(order.id)" aria-label="Hapus pesanan">
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-item>
+      </ion-list>
+    </section>
+  </main>
+</ion-content>

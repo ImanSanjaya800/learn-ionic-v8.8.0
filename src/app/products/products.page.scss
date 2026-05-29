@@ -1,0 +1,55 @@
+.crud-layout {
+  display: grid;
+  gap: 18px;
+  padding: 16px;
+}
+
+.form-section,
+.list-section {
+  background: var(--ion-card-background, #fff);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+
+ion-list {
+  background: transparent;
+}
+
+.form-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.section-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+ion-item {
+  --padding-start: 0;
+}
+
+ion-buttons ion-button {
+  width: 40px;
+  height: 40px;
+}
+
+@media (min-width: 760px) {
+  .crud-layout {
+    grid-template-columns: minmax(260px, 360px) 1fr;
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+}

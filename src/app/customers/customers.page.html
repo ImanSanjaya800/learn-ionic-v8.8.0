@@ -1,0 +1,76 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>CRUD Pelanggan</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">CRUD Pelanggan</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <main class="crud-layout">
+    <section class="form-section">
+      <h2>{{ editingId ? 'Edit Pelanggan' : 'Tambah Pelanggan' }}</h2>
+
+      <ion-list lines="full">
+        <ion-item>
+          <ion-input label="Nama Pelanggan" labelPlacement="stacked" placeholder="Contoh: Budi Santoso" [(ngModel)]="form.name"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input label="Nomor HP" labelPlacement="stacked" placeholder="Contoh: 0812-0000-0000" [(ngModel)]="form.phone"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-select label="Level Member" labelPlacement="stacked" [(ngModel)]="form.level">
+            <ion-select-option value="Bronze">Bronze</ion-select-option>
+            <ion-select-option value="Silver">Silver</ion-select-option>
+            <ion-select-option value="Gold">Gold</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-list>
+
+      <div class="form-actions">
+        <ion-button expand="block" color="secondary" (click)="saveCustomer()">
+          <ion-icon name="save-outline" slot="start"></ion-icon>
+          {{ editingId ? 'Simpan Perubahan' : 'Tambah Pelanggan' }}
+        </ion-button>
+        <ion-button *ngIf="editingId" expand="block" fill="outline" color="medium" (click)="resetForm()">
+          <ion-icon name="close-outline" slot="start"></ion-icon>
+          Batal
+        </ion-button>
+      </div>
+    </section>
+
+    <section class="list-section">
+      <div class="section-heading">
+        <h2>Daftar Pelanggan</h2>
+        <ion-badge color="secondary">{{ customers.length }} orang</ion-badge>
+      </div>
+
+      <ion-list>
+        <ion-item *ngFor="let customer of customers">
+          <ion-avatar slot="start">
+            <span>{{ customer.name.charAt(0) }}</span>
+          </ion-avatar>
+          <ion-label>
+            <h3>{{ customer.name }}</h3>
+            <p>{{ customer.phone }} · {{ customer.level }}</p>
+          </ion-label>
+          <ion-buttons slot="end">
+            <ion-button fill="clear" color="primary" (click)="editCustomer(customer)" aria-label="Edit pelanggan">
+              <ion-icon name="create-outline"></ion-icon>
+            </ion-button>
+            <ion-button fill="clear" color="danger" (click)="deleteCustomer(customer.id)" aria-label="Hapus pelanggan">
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-item>
+      </ion-list>
+    </section>
+  </main>
+</ion-content>

@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Blank
+      Menu CRUD
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -9,12 +9,36 @@
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
+      <ion-title size="large">Menu CRUD</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
-  </div>
+  <main class="home-layout">
+    <section class="intro">
+      <h1>Pilih Menu</h1>
+      <p>Setiap card akan membuka halaman CRUD yang berbeda.</p>
+    </section>
+
+    <section class="menu-grid">
+      <ion-card
+        *ngFor="let menu of menus"
+        button="true"
+        [color]="menu.color"
+        [routerLink]="menu.route"
+        routerDirection="forward"
+      >
+        <ion-card-header>
+          <div class="card-icon">
+            <ion-icon [name]="menu.icon"></ion-icon>
+          </div>
+          <ion-card-title>{{ menu.title }}</ion-card-title>
+          <ion-card-subtitle>{{ menu.subtitle }}</ion-card-subtitle>
+        </ion-card-header>
+
+        <ion-card-content>
+          {{ menu.description }}
+        </ion-card-content>
+      </ion-card>
+    </section>
+  </main>
 </ion-content>
