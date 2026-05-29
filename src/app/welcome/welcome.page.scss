@@ -1,0 +1,173 @@
+.welcome-content {
+  --background: #f5f7fb;
+}
+
+.welcome-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 100%;
+  padding: 18px 16px 22px;
+}
+
+.top-bar,
+.bottom-bar {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.brand {
+  align-items: center;
+  color: #172033;
+  display: flex;
+  font-size: 16px;
+  font-weight: 800;
+  gap: 10px;
+}
+
+.brand-mark {
+  background: var(--ion-color-primary);
+  border-radius: 8px;
+  color: #fff;
+  display: grid;
+  font-size: 22px;
+  height: 38px;
+  place-items: center;
+  width: 38px;
+}
+
+.slider-window {
+  align-items: center;
+  display: flex;
+  max-width: 980px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.slides-track {
+  display: flex;
+  transition: transform 260ms ease;
+  width: 100%;
+}
+
+.slide {
+  display: grid;
+  flex: 0 0 100%;
+  gap: 24px;
+  padding: 26px 0;
+}
+
+.visual {
+  align-self: center;
+  background: rgba(var(--ion-color-primary-rgb), 0.1);
+  border: 1px solid rgba(var(--ion-color-primary-rgb), 0.16);
+  border-radius: 8px;
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+}
+
+.visual-ring {
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 18px 45px rgba(23, 32, 51, 0.14);
+  display: grid;
+  height: 128px;
+  place-items: center;
+  width: 128px;
+}
+
+.visual-ring ion-icon {
+  font-size: 62px;
+}
+
+.slide-copy {
+  align-self: center;
+}
+
+.slide-copy h1 {
+  color: #172033;
+  font-size: 31px;
+  font-weight: 850;
+  line-height: 1.12;
+  margin: 14px 0 10px;
+}
+
+.slide-copy p {
+  color: #5d687d;
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+ion-list {
+  background: transparent;
+}
+
+ion-item {
+  --background: transparent;
+  --padding-start: 0;
+  color: #293449;
+  font-weight: 600;
+}
+
+.dots {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.dots button {
+  background: #c7cedb;
+  border: 0;
+  border-radius: 999px;
+  height: 9px;
+  padding: 0;
+  transition: width 180ms ease, background 180ms ease;
+  width: 9px;
+}
+
+.dots button.active {
+  background: var(--ion-color-primary);
+  width: 30px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+@media (min-width: 760px) {
+  .welcome-shell {
+    padding: 24px;
+  }
+
+  .slide {
+    grid-template-columns: 0.95fr 1.05fr;
+    gap: 42px;
+    padding: 34px 0;
+  }
+
+  .visual {
+    min-height: 420px;
+  }
+
+  .slide-copy h1 {
+    font-size: 44px;
+  }
+}
+
+@media (max-width: 420px) {
+  .bottom-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+}

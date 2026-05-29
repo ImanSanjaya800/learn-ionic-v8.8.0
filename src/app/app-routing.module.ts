@@ -1,7 +1,13 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { welcomeAgreementGuard } from './guards/welcome-agreement.guard';
 
 const routes: Routes = [
+  {
+    path: 'welcome',
+    canActivate: [welcomeAgreementGuard],
+    loadChildren: () => import('./welcome/welcome.module').then( m => m.WelcomePageModule)
+  },
   {
     path: 'home',
     loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
@@ -20,7 +26,7 @@ const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'home',
+    redirectTo: 'welcome',
     pathMatch: 'full'
   },
 ];

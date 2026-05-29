@@ -1,0 +1,67 @@
+<ion-content [fullscreen]="true" class="welcome-content">
+  <main class="welcome-shell">
+    <header class="top-bar">
+      <div class="brand">
+        <span class="brand-mark">
+          <ion-icon name="layers-outline"></ion-icon>
+        </span>
+        <span>CRUD Ionic</span>
+      </div>
+
+      <ion-button fill="clear" size="small" (click)="skipToPrivacy()">Lewati</ion-button>
+    </header>
+
+    <section class="slider-window" aria-live="polite">
+      <div class="slides-track" [style.transform]="'translateX(-' + activeSlide * 100 + '%)'">
+        <article class="slide" *ngFor="let slide of slides">
+          <div class="visual" [class]="'visual ion-color-' + slide.color">
+            <div class="visual-ring">
+              <ion-icon [name]="slide.icon" [color]="slide.color"></ion-icon>
+            </div>
+          </div>
+
+          <div class="slide-copy">
+            <ion-badge [color]="slide.color">Slide {{ activeSlide + 1 }} dari {{ slides.length }}</ion-badge>
+            <h1>{{ slide.title }}</h1>
+            <p>{{ slide.subtitle }}</p>
+
+            <ion-list lines="none">
+              <ion-item *ngFor="let point of slide.points">
+                <ion-icon name="checkmark-circle-outline" slot="start" [color]="slide.color"></ion-icon>
+                <ion-label>{{ point }}</ion-label>
+              </ion-item>
+            </ion-list>
+
+            <ion-item *ngIf="isLastSlide" class="agreement-item" lines="none">
+              <ion-checkbox slot="start" [(ngModel)]="hasAgreed"></ion-checkbox>
+              <ion-label>Saya sudah membaca dan menyetujui Privacy Policy aplikasi ini.</ion-label>
+            </ion-item>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <footer class="bottom-bar">
+      <div class="dots" aria-label="Navigasi slide">
+        <button
+          *ngFor="let slide of slides; let i = index"
+          type="button"
+          [class.active]="i === activeSlide"
+          (click)="goToSlide(i)"
+          [attr.aria-label]="'Buka slide ' + (i + 1)"
+        ></button>
+      </div>
+
+      <div class="actions">
+        <ion-button fill="outline" color="medium" [disabled]="activeSlide === 0" (click)="previousSlide()">
+          <ion-icon name="chevron-back-outline" slot="start"></ion-icon>
+          Kembali
+        </ion-button>
+        <ion-button [disabled]="isLastSlide && !hasAgreed" (click)="nextSlide()">
+          {{ isLastSlide ? 'Masuk Aplikasi' : 'Lanjut' }}
+          <ion-icon [name]="isLastSlide ? 'arrow-forward-outline' : 'chevron-forward-outline'" slot="end"></ion-icon>
+        </ion-button>
+      </div>
+    </footer>
+  </main>
+</ion-content>
