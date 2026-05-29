@@ -8,6 +8,10 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="loadCustomers($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
   <ion-header collapse="condense">
     <ion-toolbar>
       <ion-title size="large">CRUD Pelanggan</ion-title>
@@ -17,6 +21,7 @@
   <main class="crud-layout">
     <section class="form-section">
       <h2>{{ editingId ? 'Edit Pelanggan' : 'Tambah Pelanggan' }}</h2>
+      <ion-note *ngIf="errorMessage" color="danger">{{ errorMessage }}</ion-note>
 
       <ion-list lines="full">
         <ion-item>
@@ -35,7 +40,8 @@
       </ion-list>
 
       <div class="form-actions">
-        <ion-button expand="block" color="secondary" (click)="saveCustomer()">
+        <ion-button expand="block" color="secondary" [disabled]="isSaving" (click)="saveCustomer()">
+          <ion-spinner *ngIf="isSaving" name="crescent" slot="start"></ion-spinner>
           <ion-icon name="save-outline" slot="start"></ion-icon>
           {{ editingId ? 'Simpan Perubahan' : 'Tambah Pelanggan' }}
         </ion-button>
@@ -50,6 +56,11 @@
       <div class="section-heading">
         <h2>Daftar Pelanggan</h2>
         <ion-badge color="secondary">{{ customers.length }} orang</ion-badge>
+      </div>
+
+      <div *ngIf="isLoading" class="state-box">
+        <ion-spinner name="crescent"></ion-spinner>
+        <span>Memuat data pelanggan...</span>
       </div>
 
       <ion-list>
@@ -71,6 +82,10 @@
           </ion-buttons>
         </ion-item>
       </ion-list>
+
+      <ion-item *ngIf="!isLoading && customers.length === 0" lines="none">
+        <ion-label>Belum ada data pelanggan.</ion-label>
+      </ion-item>
     </section>
   </main>
 </ion-content>

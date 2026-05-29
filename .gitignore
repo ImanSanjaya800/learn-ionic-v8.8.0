@@ -22,6 +22,7 @@ log.txt
 /www
 /platforms
 /plugins
+/apiphpionic
 
 # Compiled output
 /dist

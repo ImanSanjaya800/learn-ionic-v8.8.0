@@ -1,12 +1,5 @@
-import { Component } from '@angular/core';
-
-interface Product {
-  id: number;
-  name: string;
-  category: string;
-  stock: number;
-  price: number;
-}
+import { Component, OnInit } from '@angular/core';
+import { ApiService, Product } from '../services/api.service';
 
 @Component({
   selector: 'app-products',
@@ -14,33 +7,63 @@ interface Product {
   styleUrls: ['./products.page.scss'],
   standalone: false,
 })
-export class ProductsPage {
-  products: Product[] = [
-    { id: 1, name: 'Kopi Susu', category: 'Minuman', stock: 24, price: 18000 },
-    { id: 2, name: 'Roti Bakar', category: 'Makanan', stock: 15, price: 22000 },
-    { id: 3, name: 'Matcha Latte', category: 'Minuman', stock: 18, price: 25000 },
-  ];
-
+export class ProductsPage implements OnInit {
+  products: Product[] = [];
   form: Product = this.createEmptyProduct();
   editingId: number | null = null;
+  errorMessage = '';
+  isLoading = false;
+  isSaving = false;
 
-  saveProduct() {
+  constructor(private apiService: ApiService) {}
+
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  async loadProducts(event?: any) {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    try {
+      this.products = await this.apiService.getProducts();
+    } catch (error) {
+      this.errorMessage = this.getErrorMessage(error, 'Gagal mengambil data produk');
+    } finally {
+      this.isLoading = false;
+      event?.target?.complete();
+    }
+  }
+
+  async saveProduct() {
     if (!this.form.name.trim() || !this.form.category.trim()) {
       return;
     }
 
-    if (this.editingId) {
-      this.products = this.products.map((product) =>
-        product.id === this.editingId ? { ...this.form, id: this.editingId } : product
-      );
-    } else {
-      this.products = [
-        { ...this.form, id: Date.now() },
-        ...this.products,
-      ];
-    }
+    this.isSaving = true;
+    this.errorMessage = '';
 
-    this.resetForm();
+    try {
+      const payload = {
+        name: this.form.name,
+        category: this.form.category,
+        stock: Number(this.form.stock),
+        price: Number(this.form.price),
+      };
+
+      if (this.editingId) {
+        await this.apiService.updateProduct(this.editingId, payload);
+      } else {
+        await this.apiService.createProduct(payload);
+      }
+
+      this.resetForm();
+      await this.loadProducts();
+    } catch (error) {
+      this.errorMessage = this.getErrorMessage(error, 'Gagal menyimpan produk');
+    } finally {
+      this.isSaving = false;
+    }
   }
 
   editProduct(product: Product) {
@@ -48,10 +71,17 @@ export class ProductsPage {
     this.form = { ...product };
   }
 
-  deleteProduct(id: number) {
-    this.products = this.products.filter((product) => product.id !== id);
-    if (this.editingId === id) {
-      this.resetForm();
+  async deleteProduct(id: number) {
+    this.errorMessage = '';
+
+    try {
+      await this.apiService.deleteProduct(id);
+      if (this.editingId === id) {
+        this.resetForm();
+      }
+      await this.loadProducts();
+    } catch (error) {
+      this.errorMessage = this.getErrorMessage(error, 'Gagal menghapus produk');
     }
   }
 
@@ -68,5 +98,9 @@ export class ProductsPage {
       stock: 0,
       price: 0,
     };
+  }
+
+  private getErrorMessage(error: unknown, fallback: string): string {
+    return error instanceof Error ? error.message : fallback;
   }
 }

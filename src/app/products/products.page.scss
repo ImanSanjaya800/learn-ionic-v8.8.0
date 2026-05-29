@@ -28,6 +28,14 @@ ion-list {
   margin-top: 14px;
 }
 
+.state-box {
+  align-items: center;
+  color: var(--ion-color-medium-shade);
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+
 .section-heading {
   align-items: center;
   display: flex;

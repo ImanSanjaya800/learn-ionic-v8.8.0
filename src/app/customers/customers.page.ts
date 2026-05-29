@@ -1,11 +1,5 @@
-import { Component } from '@angular/core';
-
-interface Customer {
-  id: number;
-  name: string;
-  phone: string;
-  level: string;
-}
+import { Component, OnInit } from '@angular/core';
+import { ApiService, Customer } from '../services/api.service';
 
 @Component({
   selector: 'app-customers',
@@ -13,33 +7,62 @@ interface Customer {
   styleUrls: ['./customers.page.scss'],
   standalone: false,
 })
-export class CustomersPage {
-  customers: Customer[] = [
-    { id: 1, name: 'Andi Saputra', phone: '0812-3456-7890', level: 'Gold' },
-    { id: 2, name: 'Maya Lestari', phone: '0821-1111-2233', level: 'Silver' },
-    { id: 3, name: 'Raka Pratama', phone: '0857-4444-8899', level: 'Bronze' },
-  ];
-
+export class CustomersPage implements OnInit {
+  customers: Customer[] = [];
   form: Customer = this.createEmptyCustomer();
   editingId: number | null = null;
+  errorMessage = '';
+  isLoading = false;
+  isSaving = false;
 
-  saveCustomer() {
+  constructor(private apiService: ApiService) {}
+
+  ngOnInit() {
+    this.loadCustomers();
+  }
+
+  async loadCustomers(event?: any) {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    try {
+      this.customers = await this.apiService.getCustomers();
+    } catch (error) {
+      this.errorMessage = this.getErrorMessage(error, 'Gagal mengambil data pelanggan');
+    } finally {
+      this.isLoading = false;
+      event?.target?.complete();
+    }
+  }
+
+  async saveCustomer() {
     if (!this.form.name.trim() || !this.form.phone.trim()) {
       return;
     }
 
-    if (this.editingId) {
-      this.customers = this.customers.map((customer) =>
-        customer.id === this.editingId ? { ...this.form, id: this.editingId } : customer
-      );
-    } else {
-      this.customers = [
-        { ...this.form, id: Date.now() },
-        ...this.customers,
-      ];
-    }
+    this.isSaving = true;
+    this.errorMessage = '';
 
-    this.resetForm();
+    try {
+      const payload = {
+        name: this.form.name,
+        phone: this.form.phone,
+        level: this.form.level,
+      };
+
+      if (this.editingId) {
+        await this.apiService.updateCustomer(this.editingId, payload);
+      } else {
+        await this.apiService.createCustomer(payload);
+      }
+
+      this.resetForm();
+      await this.loadCustomers();
+    } catch (error) {
+      this.errorMessage = this.getErrorMessage(error, 'Gagal menyimpan pelanggan');
+    } finally {
+      this.isSaving = false;
+    }
   }
 
   editCustomer(customer: Customer) {
@@ -47,10 +70,17 @@ export class CustomersPage {
     this.form = { ...customer };
   }
 
-  deleteCustomer(id: number) {
-    this.customers = this.customers.filter((customer) => customer.id !== id);
-    if (this.editingId === id) {
-      this.resetForm();
+  async deleteCustomer(id: number) {
+    this.errorMessage = '';
+
+    try {
+      await this.apiService.deleteCustomer(id);
+      if (this.editingId === id) {
+        this.resetForm();
+      }
+      await this.loadCustomers();
+    } catch (error) {
+      this.errorMessage = this.getErrorMessage(error, 'Gagal menghapus pelanggan');
     }
   }
 
@@ -66,5 +96,9 @@ export class CustomersPage {
       phone: '',
       level: 'Bronze',
     };
+  }
+
+  private getErrorMessage(error: unknown, fallback: string): string {
+    return error instanceof Error ? error.message : fallback;
   }
 }

@@ -8,6 +8,10 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="loadProducts($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
   <ion-header collapse="condense">
     <ion-toolbar>
       <ion-title size="large">CRUD Produk</ion-title>
@@ -17,6 +21,7 @@
   <main class="crud-layout">
     <section class="form-section">
       <h2>{{ editingId ? 'Edit Produk' : 'Tambah Produk' }}</h2>
+      <ion-note *ngIf="errorMessage" color="danger">{{ errorMessage }}</ion-note>
 
       <ion-list lines="full">
         <ion-item>
@@ -34,7 +39,8 @@
       </ion-list>
 
       <div class="form-actions">
-        <ion-button expand="block" (click)="saveProduct()">
+        <ion-button expand="block" [disabled]="isSaving" (click)="saveProduct()">
+          <ion-spinner *ngIf="isSaving" name="crescent" slot="start"></ion-spinner>
           <ion-icon name="save-outline" slot="start"></ion-icon>
           {{ editingId ? 'Simpan Perubahan' : 'Tambah Produk' }}
         </ion-button>
@@ -49,6 +55,11 @@
       <div class="section-heading">
         <h2>Daftar Produk</h2>
         <ion-badge color="primary">{{ products.length }} item</ion-badge>
+      </div>
+
+      <div *ngIf="isLoading" class="state-box">
+        <ion-spinner name="crescent"></ion-spinner>
+        <span>Memuat data produk...</span>
       </div>
 
       <ion-list>
@@ -69,6 +80,10 @@
           </ion-item>
         </ion-item-sliding>
       </ion-list>
+
+      <ion-item *ngIf="!isLoading && products.length === 0" lines="none">
+        <ion-label>Belum ada data produk.</ion-label>
+      </ion-item>
     </section>
   </main>
 </ion-content>
