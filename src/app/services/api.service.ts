@@ -32,9 +32,9 @@ export interface Order {
   total: number;
 }
 
-type ProductPayload = Omit<Product, 'id'>;
-type CustomerPayload = Omit<Customer, 'id'>;
-type OrderPayload = Omit<Order, 'id'>;
+export type ProductPayload = Omit<Product, 'id'>;
+export type CustomerPayload = Omit<Customer, 'id'>;
+export type OrderPayload = Omit<Order, 'id'>;
 
 @Injectable({
   providedIn: 'root',

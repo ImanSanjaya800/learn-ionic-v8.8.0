@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService, Order } from '../services/api.service';
+import { OfflineCrudService, OfflineOrder } from '../services/offline-crud.service';
 
 @Component({
   selector: 'app-orders',
@@ -8,17 +9,28 @@ import { ApiService, Order } from '../services/api.service';
   standalone: false,
 })
 export class OrdersPage implements OnInit {
-  orders: Order[] = [];
-  form: Order = this.createEmptyOrder();
+  orders: OfflineOrder[] = [];
+  form: OfflineOrder = this.createEmptyOrder();
   editingId: number | null = null;
+  editingOfflineId: string | null = null;
   errorMessage = '';
+  syncMessage = '';
   isLoading = false;
   isSaving = false;
+  pendingOfflineCount = 0;
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private offlineCrudService: OfflineCrudService
+  ) {}
 
   ngOnInit() {
     this.loadOrders();
+  }
+
+  async ionViewWillEnter() {
+    await this.syncOfflineData();
+    await this.loadOrders();
   }
 
   async loadOrders(event?: any) {
@@ -26,10 +38,13 @@ export class OrdersPage implements OnInit {
     this.errorMessage = '';
 
     try {
-      this.orders = await this.apiService.getOrders();
+      const orders = await this.apiService.getOrders();
+      this.orders = this.offlineCrudService.mergeOrders(orders);
     } catch (error) {
+      this.orders = this.offlineCrudService.mergeOrders([]);
       this.errorMessage = this.getErrorMessage(error, 'Gagal mengambil data pesanan');
     } finally {
+      this.refreshPendingCount();
       this.isLoading = false;
       event?.target?.complete();
     }
@@ -51,7 +66,10 @@ export class OrdersPage implements OnInit {
         total: Number(this.form.total),
       };
 
-      if (this.editingId) {
+      if (this.editingOfflineId) {
+        this.offlineCrudService.updateOfflineCreate(this.editingOfflineId, payload);
+        this.syncMessage = 'Perubahan pesanan tersimpan offline dan akan disinkronkan otomatis.';
+      } else if (this.editingId) {
         await this.apiService.updateOrder(this.editingId, payload);
       } else {
         await this.apiService.createOrder(payload);
@@ -60,33 +78,62 @@ export class OrdersPage implements OnInit {
       this.resetForm();
       await this.loadOrders();
     } catch (error) {
-      this.errorMessage = this.getErrorMessage(error, 'Gagal menyimpan pesanan');
+      const payload = {
+        customer: this.form.customer,
+        menu: this.form.menu,
+        status: this.form.status,
+        total: Number(this.form.total),
+      };
+
+      if (this.editingId) {
+        this.offlineCrudService.enqueueUpdate('orders', this.editingId, payload);
+      } else {
+        this.offlineCrudService.enqueueCreate('orders', payload);
+      }
+
+      this.syncMessage = 'Pesanan tersimpan offline dan akan dikirim otomatis saat koneksi/API aktif.';
+      this.resetForm();
+      this.orders = this.offlineCrudService.mergeOrders(this.orders.filter((order) => !order.offlineStatus) as Order[]);
+      this.refreshPendingCount();
     } finally {
       this.isSaving = false;
     }
   }
 
-  editOrder(order: Order) {
-    this.editingId = order.id;
+  editOrder(order: OfflineOrder) {
+    this.editingId = order.offlineAction === 'create' ? null : order.id;
+    this.editingOfflineId = order.offlineAction === 'create' ? order.offlineId || null : null;
     this.form = { ...order };
   }
 
-  async deleteOrder(id: number) {
+  async deleteOrder(order: OfflineOrder) {
     this.errorMessage = '';
 
+    if (order.offlineAction === 'create' && order.offlineId) {
+      this.offlineCrudService.removeOfflineCreate(order.offlineId);
+      this.syncMessage = 'Pesanan offline dihapus dari antrean sinkronisasi.';
+      this.resetForm();
+      await this.loadOrders();
+      return;
+    }
+
     try {
-      await this.apiService.deleteOrder(id);
-      if (this.editingId === id) {
+      await this.apiService.deleteOrder(order.id);
+      if (this.editingId === order.id) {
         this.resetForm();
       }
       await this.loadOrders();
     } catch (error) {
-      this.errorMessage = this.getErrorMessage(error, 'Gagal menghapus pesanan');
+      this.offlineCrudService.enqueueDelete('orders', order.id);
+      this.syncMessage = 'Penghapusan pesanan disimpan offline dan akan disinkronkan otomatis.';
+      this.orders = this.orders.filter((item) => item.id !== order.id);
+      this.refreshPendingCount();
     }
   }
 
   resetForm() {
     this.editingId = null;
+    this.editingOfflineId = null;
     this.form = this.createEmptyOrder();
   }
 
@@ -102,5 +149,24 @@ export class OrdersPage implements OnInit {
 
   private getErrorMessage(error: unknown, fallback: string): string {
     return error instanceof Error ? error.message : fallback;
+  }
+
+  private async syncOfflineData() {
+    this.refreshPendingCount();
+
+    if (this.offlineCrudService.getPendingCount() === 0) {
+      return;
+    }
+
+    const syncedCount = await this.offlineCrudService.syncPendingOperations();
+    this.refreshPendingCount();
+
+    if (syncedCount > 0) {
+      this.syncMessage = `${syncedCount} data offline berhasil disinkronkan.`;
+    }
+  }
+
+  private refreshPendingCount() {
+    this.pendingOfflineCount = this.offlineCrudService.getPendingCount('orders');
   }
 }

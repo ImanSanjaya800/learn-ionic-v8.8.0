@@ -20,8 +20,9 @@
 
   <main class="crud-layout">
     <section class="form-section">
-      <h2>{{ editingId ? 'Edit Produk' : 'Tambah Produk' }}</h2>
+      <h2>{{ (editingId || editingOfflineId) ? 'Edit Produk' : 'Tambah Produk' }}</h2>
       <ion-note *ngIf="errorMessage" color="danger">{{ errorMessage }}</ion-note>
+      <ion-note *ngIf="syncMessage" color="warning">{{ syncMessage }}</ion-note>
 
       <ion-list lines="full">
         <ion-item>
@@ -42,7 +43,7 @@
         <ion-button expand="block" [disabled]="isSaving" (click)="saveProduct()">
           <ion-spinner *ngIf="isSaving" name="crescent" slot="start"></ion-spinner>
           <ion-icon name="save-outline" slot="start"></ion-icon>
-          {{ editingId ? 'Simpan Perubahan' : 'Tambah Produk' }}
+          {{ (editingId || editingOfflineId) ? 'Simpan Perubahan' : 'Tambah Produk' }}
         </ion-button>
         <ion-button *ngIf="editingId" expand="block" fill="outline" color="medium" (click)="resetForm()">
           <ion-icon name="close-outline" slot="start"></ion-icon>
@@ -54,7 +55,10 @@
     <section class="list-section">
       <div class="section-heading">
         <h2>Daftar Produk</h2>
-        <ion-badge color="primary">{{ products.length }} item</ion-badge>
+        <div class="badge-group">
+          <ion-badge *ngIf="pendingOfflineCount > 0" color="warning">{{ pendingOfflineCount }} offline</ion-badge>
+          <ion-badge color="primary">{{ products.length }} item</ion-badge>
+        </div>
       </div>
 
       <div *ngIf="isLoading" class="state-box">
@@ -68,12 +72,13 @@
             <ion-label>
               <h3>{{ product.name }}</h3>
               <p>{{ product.category }} · Stok {{ product.stock }} · Rp {{ product.price | number }}</p>
+              <ion-badge *ngIf="product.offlineStatus" color="warning">Offline</ion-badge>
             </ion-label>
             <ion-buttons slot="end">
               <ion-button fill="clear" color="primary" (click)="editProduct(product)" aria-label="Edit produk">
                 <ion-icon name="create-outline"></ion-icon>
               </ion-button>
-              <ion-button fill="clear" color="danger" (click)="deleteProduct(product.id)" aria-label="Hapus produk">
+              <ion-button fill="clear" color="danger" (click)="deleteProduct(product)" aria-label="Hapus produk">
                 <ion-icon name="trash-outline"></ion-icon>
               </ion-button>
             </ion-buttons>

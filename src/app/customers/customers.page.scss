@@ -44,6 +44,11 @@ ion-list {
   margin-bottom: 8px;
 }
 
+.badge-group {
+  display: flex;
+  gap: 8px;
+}
+
 ion-item {
   --padding-start: 0;
 }

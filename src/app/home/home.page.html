@@ -37,6 +37,9 @@
 
         <ion-card-content>
           {{ menu.description }}
+          <ion-badge *ngIf="getPendingCount(menu.entity) > 0" color="light">
+            {{ getPendingCount(menu.entity) }} data offline
+          </ion-badge>
         </ion-card-content>
       </ion-card>
     </section>

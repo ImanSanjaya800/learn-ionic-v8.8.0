@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { CrudEntity, OfflineCrudService } from '../services/offline-crud.service';
 
 interface MenuCard {
   title: string;
@@ -7,6 +8,7 @@ interface MenuCard {
   color: string;
   icon: string;
   route: string;
+  entity: CrudEntity;
 }
 
 @Component({
@@ -24,6 +26,7 @@ export class HomePage {
       color: 'primary',
       icon: 'cube-outline',
       route: '/products',
+      entity: 'products',
     },
     {
       title: 'Pelanggan',
@@ -32,6 +35,7 @@ export class HomePage {
       color: 'secondary',
       icon: 'people-outline',
       route: '/customers',
+      entity: 'customers',
     },
     {
       title: 'Pesanan',
@@ -40,9 +44,33 @@ export class HomePage {
       color: 'warning',
       icon: 'receipt-outline',
       route: '/orders',
+      entity: 'orders',
     },
   ];
 
-  constructor() {}
+  pendingCounts: Record<CrudEntity, number> = {
+    products: 0,
+    customers: 0,
+    orders: 0,
+  };
+
+  constructor(private offlineCrudService: OfflineCrudService) {}
+
+  async ionViewWillEnter() {
+    await this.syncOfflineData();
+  }
+
+  getPendingCount(entity: CrudEntity): number {
+    return this.pendingCounts[entity];
+  }
+
+  private async syncOfflineData() {
+    await this.offlineCrudService.syncPendingOperations();
+    this.pendingCounts = {
+      products: this.offlineCrudService.getPendingCount('products'),
+      customers: this.offlineCrudService.getPendingCount('customers'),
+      orders: this.offlineCrudService.getPendingCount('orders'),
+    };
+  }
 
 }
